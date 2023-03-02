@@ -3,6 +3,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class CorreiosUrls {
   static const proxyappToken =
@@ -30,6 +31,11 @@ class Correios {
     switch (response.statusCode) {
       case 201:
         token = jsonDecode(response.body)?['token'];
+        final decoded = JwtDecoder.decode(token!);
+        final millisecondsSinceEpoch =
+            decoded['exp'] * 1000 - 120000; // 120 segundos de margem
+        tokenExpiration =
+            DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch);
         return token!;
       default:
         throw Exception('Falha ao gerar token de acesso aos correios');
