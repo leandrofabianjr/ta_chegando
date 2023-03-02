@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:ta_chegando/test_page.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:ta_chegando/pages/home_page.dart';
 
-void main() {
+void main() async {
+  await Hive.initFlutter();
   runApp(const TaChegandoApp());
 }
 
@@ -15,7 +17,7 @@ class TaChegandoApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const TestPage(),
+      home: const HomePage(),
     );
   }
 }

@@ -209,7 +209,7 @@ class CorreiosObjectEvent {
     );
   }
 
-  static List<CorreiosObjectEvent?> fromJsonList(List jsonList) {
+  static List<CorreiosObjectEvent?> fromJsonList(List? jsonList) {
     if (jsonList == null) return [];
 
     return jsonList.map((json) => CorreiosObjectEvent.fromJson(json)).toList();
