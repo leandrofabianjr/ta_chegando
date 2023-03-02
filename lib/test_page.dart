@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:ta_chegando/services/correios.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class TestPage extends StatefulWidget {
+  const TestPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<TestPage> createState() => _TestPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _TestPageState extends State<TestPage> {
   bool _loading = false;
-  String retorno = 'Dados aqui';
+  String dados = 'Dados aqui';
+  late Correios api;
+
+  @override
+  initState() {
+    api = Correios();
+
+    super.initState();
+  }
 
   loading([bool state = true]) {
     setState(() => _loading = state);
@@ -17,7 +26,14 @@ class _HomePageState extends State<HomePage> {
 
   request() async {
     loading();
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final token = await api.generateToken();
+      setState(() {
+        dados = token;
+      });
+    } catch (e) {
+      dados = e.toString();
+    }
     loading(false);
   }
 
@@ -35,7 +51,7 @@ class _HomePageState extends State<HomePage> {
               Flexible(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [Text(retorno)],
+                  children: [Text(dados)],
                 ),
               ),
               ElevatedButton(
