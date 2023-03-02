@@ -27,9 +27,9 @@ class _TestPageState extends State<TestPage> {
   request() async {
     loading();
     try {
-      final token = await api.generateToken();
+      final object = await api.fetchTrackingService('OT610216475BR');
       setState(() {
-        dados = token;
+        dados = object.toString();
       });
     } catch (e) {
       dados = e.toString();
