@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
 
@@ -29,6 +30,12 @@ class Correios {
   }
 
   Future<String> generateToken() async {
+    if (token == null) {
+      final configsBox = (await Hive.openBox('configs'));
+      token = configsBox.get('token');
+      await configsBox.close();
+    }
+
     if (token != null &&
         token!.isNotEmpty &&
         tokenExpiration != null &&
@@ -49,6 +56,11 @@ class Correios {
             decoded['exp'] * 1000 - 120000; // 120 segundos de margem
         tokenExpiration =
             DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch);
+
+        (await Hive.openBox('configs'))
+          ..put('token', token)
+          ..close();
+
         return token!;
       default:
         throw Exception('Falha ao gerar token de acesso aos correios');
@@ -56,8 +68,9 @@ class Correios {
   }
 
   Future<CorreiosObject?> fetchTrackingService(String code) async {
+    final upperCode = code.toUpperCase();
     final response = await http.get(
-      Uri.parse(CorreiosUrls.proxyappRastrear(code)),
+      Uri.parse(CorreiosUrls.proxyappRastrear(upperCode)),
       headers: await generateHeaders(),
     );
     switch (response.statusCode) {
@@ -106,6 +119,13 @@ class CorreiosUnidade {
       tipo: json['tipo'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'endereco': endereco,
+      'tipo': tipo,
+    };
+  }
 }
 
 class CorreiosTipoPostal {
@@ -127,6 +147,14 @@ class CorreiosTipoPostal {
       descricao: json['descricao'],
       sigla: json['sigla'],
     );
+  }
+
+  Map<String, String?> toJson() {
+    return {
+      'categoria': categoria,
+      'descricao': descricao,
+      'sigla': sigla,
+    };
   }
 }
 
@@ -174,6 +202,22 @@ class CorreiosObject {
       habilitaCrowdshipping: json['habilitaCrowdshipping'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'codObjeto': codObjeto,
+      'eventos': CorreiosObjectEvent.toJsonList(eventos),
+      'modalidade': modalidade,
+      'tipoPostal': tipoPostal?.toJson(),
+      'habilitaAutoDeclaracao': habilitaAutoDeclaracao,
+      'permiteEncargoImportacao': permiteEncargoImportacao,
+      'habilitaPercorridaCarteiro': habilitaPercorridaCarteiro,
+      'bloqueioObjeto': bloqueioObjeto,
+      'possuiLocker': possuiLocker,
+      'habilitaLocker': habilitaLocker,
+      'habilitaCrowdshipping': habilitaCrowdshipping,
+    };
+  }
 }
 
 class CorreiosObjectEvent {
@@ -213,5 +257,23 @@ class CorreiosObjectEvent {
     if (jsonList == null) return [];
 
     return jsonList.map((json) => CorreiosObjectEvent.fromJson(json)).toList();
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'codigo': codigo,
+      'descricao': descricao,
+      'dtHrCriado': dtHrCriado,
+      'tipo': tipo,
+      'unidade': unidade?.toJson(),
+      'unidadeDestino': unidadeDestino?.toJson(),
+      'urlIcone': urlIcone,
+    };
+  }
+
+  static List<Map<String, dynamic>?> toJsonList(
+    List<CorreiosObjectEvent?> objetos,
+  ) {
+    return objetos.map((objeto) => objeto?.toJson()).toList();
   }
 }

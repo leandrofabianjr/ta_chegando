@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:ta_chegando/services/correios.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -9,6 +10,35 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  bool loading = false;
+  late final Correios api;
+  List<CorreiosObject> objetos = [];
+
+  @override
+  initState() {
+    api = Correios();
+    super.initState();
+    refreshList();
+  }
+
+  Future<void> refreshList() async {
+    setState(() => loading = true);
+
+    final codesBox = await Hive.openBox('codes');
+    final codes = codesBox.values.toList();
+    codesBox.close();
+
+    objetos.clear();
+    for (var code in codes) {
+      final objeto = await api.fetchTrackingService(code);
+      if (objeto != null) {
+        objetos.add(objeto);
+      }
+    }
+
+    setState(() => loading = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,32 +52,20 @@ class _HomePageState extends State<HomePage> {
           builder: (_) => const AddTrackingDialog(),
         ).then((value) => setState(() => {})),
       ),
-      body: FutureBuilder(
-        future: Hive.openBox('codes'),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Text('Erro: ${snapshot.error.toString()}');
-          }
-          if (!snapshot.hasData) {
-            return const CircularProgressIndicator();
-          }
-
-          var codes = snapshot.data?.values.toList() ?? [];
-
-          if (codes.isEmpty) {
-            return const Center(
-              child: Text('Lista vazia'),
-            );
-          }
-
-          return ListView.builder(
-            itemCount: codes.length,
-            itemBuilder: (context, index) {
-              return TrackingsListItemWidget(code: codes[index]);
-            },
-          );
-        },
-      ),
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: refreshList,
+              child: objetos.isEmpty
+                  ? ListView(
+                      children: const [Center(child: Text('Lista vazia'))],
+                    )
+                  : ListView.builder(
+                      itemCount: objetos.length,
+                      itemBuilder: (context, index) =>
+                          TrackingsListItemWidget(objeto: objetos[index]),
+                    ),
+            ),
     );
   }
 }
@@ -62,7 +80,7 @@ class AddTrackingDialog extends StatefulWidget {
 class _AddTrackingDialogState extends State<AddTrackingDialog> {
   bool loading = false;
 
-  Future saveTrackingCode(String code) async {
+  Future<void> saveTrackingCode(String code) async {
     setState(() => loading = true);
 
     var codesBox = await Hive.openBox('codes');
@@ -79,15 +97,15 @@ class _AddTrackingDialogState extends State<AddTrackingDialog> {
           children: [
             if (loading) const CircularProgressIndicator(),
             TextField(
+              autofocus: true,
               readOnly: loading,
               decoration: const InputDecoration(
                 hintText: 'AA123456785BR',
                 label: Text('Código de rastreio'),
               ),
-              onSubmitted: (value) async {
-                await saveTrackingCode(value);
-                Navigator.of(context).pop();
-              },
+              onSubmitted: (value) => saveTrackingCode(value).then(
+                (_) => Navigator.of(context).pop(),
+              ),
             ),
           ],
         ),
@@ -97,10 +115,10 @@ class _AddTrackingDialogState extends State<AddTrackingDialog> {
 }
 
 class TrackingsListItemWidget extends StatefulWidget {
-  final String code;
+  final CorreiosObject objeto;
   const TrackingsListItemWidget({
     super.key,
-    required this.code,
+    required this.objeto,
   });
 
   @override
@@ -109,14 +127,30 @@ class TrackingsListItemWidget extends StatefulWidget {
 }
 
 class _TrackingsListItemWidgetState extends State<TrackingsListItemWidget> {
+  late final Correios api;
+
+  @override
+  void initState() {
+    api = Correios();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final obj = widget.objeto;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        children: [
-          Text(widget.code),
-        ],
+      child: Card(
+        child: ExpansionTile(
+          title: Text(obj.codObjeto),
+          subtitle: Text(obj.eventos[0]!.unidade!.tipo),
+          children: [
+            Text(obj.codObjeto),
+            ...obj.eventos.map((evento) {
+              return Text(evento!.unidade!.tipo);
+            }).toList(),
+          ],
+        ),
       ),
     );
   }
