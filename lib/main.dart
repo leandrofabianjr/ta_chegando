@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:ta_chegando/data/db.dart';
 import 'package:ta_chegando/pages/home_page.dart';
 
 void main() async {
-  await Hive.initFlutter();
+  await Db.init();
   runApp(const TaChegandoApp());
 }
 

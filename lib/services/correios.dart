@@ -67,7 +67,7 @@ class Correios {
     }
   }
 
-  Future<CorreiosObject?> fetchTrackingService(String code) async {
+  Future<Map<String, dynamic>> fetchTrackingService(String code) async {
     final upperCode = code.toUpperCase();
     final response = await http.get(
       Uri.parse(CorreiosUrls.proxyappRastrear(upperCode)),
@@ -76,7 +76,7 @@ class Correios {
     switch (response.statusCode) {
       case 200:
         final json = jsonDecode(response.body);
-        return CorreiosObject.fromJson(json['objetos'][0]);
+        return json['objetos'][0];
       default:
         throw Exception('Falha ao rastrear código de encomenda');
     }
