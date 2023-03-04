@@ -10,6 +10,8 @@ class CorreiosUrls {
   static String proxyApp(url) => 'https://proxyapp.correios.com.br/v1/$url';
   static String proxyappToken() => proxyApp('app-validation');
   static String proxyappRastrear(String code) => proxyApp('sro-rastro/$code');
+  static String icon(String url) =>
+      'https://rastreamento.correios.com.br/static/rastreamento-internet/imgs/${url.substring(url.lastIndexOf('/') + 1)}';
 }
 
 class Correios {
@@ -40,6 +42,7 @@ class Correios {
         token!.isNotEmpty &&
         tokenExpiration != null &&
         tokenExpiration!.isAfter(DateTime.now())) {
+      print(token);
       return Future.value(token);
     }
 
@@ -75,7 +78,7 @@ class Correios {
     );
     switch (response.statusCode) {
       case 200:
-        final json = jsonDecode(response.body);
+        final json = jsonDecode(utf8.decode(response.bodyBytes));
         return json['objetos'][0];
       default:
         throw Exception('Falha ao rastrear código de encomenda');

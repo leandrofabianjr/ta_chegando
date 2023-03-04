@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ta_chegando/data/db.dart';
-import 'package:ta_chegando/pages/home_page.dart';
+import 'package:ta_chegando/pages/home/home_page.dart';
 
 void main() async {
   await Db.init();
