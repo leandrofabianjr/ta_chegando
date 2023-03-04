@@ -42,7 +42,6 @@ class Correios {
         token!.isNotEmpty &&
         tokenExpiration != null &&
         tokenExpiration!.isAfter(DateTime.now())) {
-      print(token);
       return Future.value(token);
     }
 

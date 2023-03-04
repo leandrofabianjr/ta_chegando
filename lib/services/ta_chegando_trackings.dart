@@ -22,7 +22,12 @@ class TaChegandoTrackings {
     final trackings = trackingsDb.values.toList();
 
     for (final t in trackings) {
-      t.json = await api.fetchTrackingService(t.codigo!);
+      try {
+        t.json = await api.fetchTrackingService(t.codigo!);
+        t.errorMessage = null;
+      } catch (e) {
+        t.errorMessage = e.toString();
+      }
       trackingsDb.put(t.codigo, t);
     }
 

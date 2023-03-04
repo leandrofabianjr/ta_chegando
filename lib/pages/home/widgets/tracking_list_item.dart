@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:ta_chegando/models/ta_chegando_objeto.dart';
 import 'package:ta_chegando/services/correios.dart';
 import 'package:ta_chegando/utils/datetime_formatter.dart';
@@ -20,18 +22,33 @@ class _TrackingsListItemWidgetState extends State<TrackingsListItem> {
     final obj = widget.objeto;
     return Card(
       child: ExpansionTile(
-        title: obj.descricao != null && obj.descricao!.isNotEmpty
-            ? Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(obj.descricao!),
-                  Text(
-                    '(${obj.codigo!})',
-                    style: const TextStyle(fontSize: 12),
-                  ),
-                ],
-              )
-            : Text(obj.codigo!),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (obj.errorMessage != null)
+              Text(
+                obj.errorMessage!,
+                textAlign: TextAlign.start,
+                style: const TextStyle(color: Colors.red, fontSize: 12),
+              ),
+            obj.descricao != null && obj.descricao!.isNotEmpty
+                ? Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(obj.descricao!),
+                          Text(
+                            '(${obj.codigo!})',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                : Text(obj.codigo!),
+          ],
+        ),
         subtitle: Text(
           (obj.tracking!.eventos.isEmpty
                   ? null
@@ -53,7 +70,8 @@ class _TrackingsListItemWidgetState extends State<TrackingsListItem> {
                                 width: 36,
                                 height: 36,
                                 child: Image.network(
-                                    CorreiosUrls.icon(e.urlIcone!)),
+                                  CorreiosUrls.icon(e.urlIcone!),
+                                ),
                               ),
                             ),
                             Column(
@@ -80,6 +98,17 @@ class _TrackingsListItemWidgetState extends State<TrackingsListItem> {
                       );
                     }).toList()) ??
               [const Text('Sem eventos')]),
+          Row(
+            children: [
+              if (kDebugMode)
+                TextButton(
+                  onPressed: () async {
+                    Clipboard.setData(ClipboardData(text: obj.toString()));
+                  },
+                  child: const Text('Copiar'),
+                ),
+            ],
+          )
         ],
       ),
     );

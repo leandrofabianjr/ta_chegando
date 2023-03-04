@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:ta_chegando/services/correios.dart';
 
 class TaChegandoObjeto {
   String? codigo;
   String? descricao;
   Map<dynamic, dynamic>? json;
+  String? errorMessage;
 
   CorreiosObject? get tracking => CorreiosObject.fromJson(json);
 
@@ -11,6 +14,7 @@ class TaChegandoObjeto {
     this.codigo,
     this.descricao,
     this.json,
+    this.errorMessage,
   });
 
   static TaChegandoObjeto? fromJson(json) {
@@ -20,6 +24,7 @@ class TaChegandoObjeto {
       codigo: json['codigo'],
       descricao: json['descricao'],
       json: json['json'],
+      errorMessage: json['errorMessage'],
     );
   }
 
@@ -34,6 +39,12 @@ class TaChegandoObjeto {
       'codigo': codigo,
       'descricao': descricao,
       'json': json,
+      'errorMessage': errorMessage,
     };
+  }
+
+  @override
+  String toString() {
+    return jsonEncode(json);
   }
 }
