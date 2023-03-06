@@ -7,14 +7,22 @@ class TaChegandoTrackings {
 
   TaChegandoTrackings() : api = Correios();
 
-  Future<void> add(
-    TaChegandoObjeto tracking,
-  ) async {
-    tracking.json = await api.fetchTrackingService(tracking.codigo!);
-
-    final trackingsDb = await Db.trackings;
-    trackingsDb.put(tracking.codigo, tracking);
-    trackingsDb.close();
+  Future<void> add({
+    required String codigo,
+    String? descricao,
+  }) async {
+    try {
+      final json = await api.fetchTrackingService(codigo);
+      final tracking = TaChegandoObjeto(
+        codigo: codigo,
+        descricao: descricao,
+        json: json,
+      );
+      final trackingsDb = await Db.trackings;
+      trackingsDb.put(tracking.codigo, tracking);
+    } catch (_) {
+      rethrow;
+    }
   }
 
   Future<List<TaChegandoObjeto>> getAllUpdated() async {
@@ -31,8 +39,10 @@ class TaChegandoTrackings {
       trackingsDb.put(t.codigo, t);
     }
 
-    trackingsDb.close();
-
     return trackings;
+  }
+
+  Future<void> delete(String codigo) async {
+    (await Db.trackings).get(codigo)!.delete();
   }
 }

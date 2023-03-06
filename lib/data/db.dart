@@ -10,9 +10,14 @@ class Db {
     Hive.registerAdapter(TaChegandoSettingsAdapter());
   }
 
-  static Future<Box<TaChegandoObjeto>> get trackings =>
-      Hive.openBox<TaChegandoObjeto>('trackings');
+  static getDb<T>(String name) {
+    return Hive.isBoxOpen(name)
+        ? Future.value(Hive.box<T>(name))
+        : Hive.openBox<T>(name);
+  }
 
-  static Future<Box<TaChegandoObjeto>> get settings =>
-      Hive.openBox<TaChegandoObjeto>('settings');
+  static Future<Box<TaChegandoObjeto>> get trackings =>
+      getDb<TaChegandoObjeto>('trackings');
+
+  static Future get settings => getDb('settings');
 }

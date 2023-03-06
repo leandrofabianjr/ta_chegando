@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:ta_chegando/models/ta_chegando_objeto.dart';
 import 'package:ta_chegando/services/correios.dart';
+import 'package:ta_chegando/services/ta_chegando_trackings.dart';
 import 'package:ta_chegando/utils/datetime_formatter.dart';
 
 class TrackingsListItem extends StatefulWidget {
@@ -49,12 +50,9 @@ class _TrackingsListItemWidgetState extends State<TrackingsListItem> {
                 : Text(obj.codigo!),
           ],
         ),
-        subtitle: Text(
-          (obj.tracking!.eventos.isEmpty
-                  ? null
-                  : obj.tracking?.eventos[0]?.unidade?.tipo) ??
-              'Sem localização',
-        ),
+        subtitle: obj.tracking!.eventos.isEmpty
+            ? null
+            : Text(obj.tracking!.eventos[0]!.descricao ?? ''),
         children: [
           ...((obj.tracking!.eventos.isEmpty
                   ? null
@@ -82,15 +80,52 @@ class _TrackingsListItemWidgetState extends State<TrackingsListItem> {
                                       e.dtHrCriado!),
                                 ),
                                 Text(e.descricao!),
-                                Row(
-                                  children: [
-                                    Text(e.unidade!.tipo, softWrap: true),
-                                    if (e.unidadeDestino != null)
-                                      const Icon(Icons.arrow_forward),
-                                    Text(e.unidadeDestino?.tipo ?? '',
-                                        softWrap: true),
-                                  ],
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 4.0),
+                                  child: Row(
+                                    children: [
+                                      const Text(
+                                        'de',
+                                        style: TextStyle(
+                                          color: Colors.grey,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Column(
+                                        children: [
+                                          Text(e.unidade?.tipo ?? ''),
+                                          Text(e.unidade?.endereco.toString() ??
+                                              ''),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                                if (e.unidadeDestino != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4.0),
+                                    child: Row(
+                                      children: [
+                                        const Text(
+                                          'para',
+                                          style: TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Column(
+                                          children: [
+                                            Text(e.unidadeDestino?.tipo ?? ''),
+                                            Text(e.unidadeDestino?.endereco
+                                                    .toString() ??
+                                                ''),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                               ],
                             ),
                           ],
@@ -107,6 +142,16 @@ class _TrackingsListItemWidgetState extends State<TrackingsListItem> {
                   },
                   child: const Text('Copiar'),
                 ),
+              TextButton.icon(
+                onPressed: () async {
+                  TaChegandoTrackings().delete(obj.codigo);
+                },
+                icon: const Icon(Icons.delete, color: Colors.red),
+                label: const Text(
+                  'Remover',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
             ],
           )
         ],

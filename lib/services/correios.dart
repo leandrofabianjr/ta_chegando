@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:ta_chegando/data/db.dart';
 
 class CorreiosUrls {
   static String proxyApp(url) => 'https://proxyapp.correios.com.br/v1/$url';
@@ -35,7 +36,6 @@ class Correios {
     if (token == null) {
       final configsBox = (await Hive.openBox('configs'));
       token = configsBox.get('token');
-      await configsBox.close();
     }
 
     if (token != null &&
@@ -59,9 +59,7 @@ class Correios {
         tokenExpiration =
             DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch);
 
-        (await Hive.openBox('configs'))
-          ..put('token', token)
-          ..close();
+        (await Db.settings).put('token', token);
 
         return token!;
       default:
@@ -69,7 +67,7 @@ class Correios {
     }
   }
 
-  Future<Map<String, dynamic>> fetchTrackingService(String code) async {
+  Future<Map<dynamic, dynamic>> fetchTrackingService(String code) async {
     final upperCode = code.toUpperCase();
     final response = await http.get(
       Uri.parse(CorreiosUrls.proxyappRastrear(upperCode)),
@@ -78,7 +76,13 @@ class Correios {
     switch (response.statusCode) {
       case 200:
         final json = jsonDecode(utf8.decode(response.bodyBytes));
-        return json['objetos'][0];
+        final objeto = json['objetos'][0] as Map;
+        if (!objeto.containsKey('eventos') &&
+            objeto.containsKey('mensagem') &&
+            (objeto['mensagem'] as String).contains('SRO-020:')) {
+          throw CorreiosNotFoundException();
+        }
+        return objeto;
       default:
         throw Exception('Falha ao rastrear código de encomenda');
     }
@@ -101,6 +105,11 @@ class CorreiosEndereco {
       cidade: json['cidade'],
       uf: json['uf'],
     );
+  }
+
+  @override
+  String toString() {
+    return '$cidade - $uf';
   }
 }
 
@@ -278,4 +287,14 @@ class CorreiosObjectEvent {
   ) {
     return objetos.map((objeto) => objeto?.toJson()).toList();
   }
+}
+
+class CorreiosTrackingException implements Exception {
+  @override
+  String toString() => 'Não foi possível rastrear o objeto';
+}
+
+class CorreiosNotFoundException implements Exception {
+  @override
+  String toString() => 'Objeto não encontrado';
 }

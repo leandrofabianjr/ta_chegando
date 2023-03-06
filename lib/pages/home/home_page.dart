@@ -39,7 +39,9 @@ class _HomePageState extends State<HomePage> {
         onPressed: () => showDialog(
           context: context,
           builder: (_) => const AddTrackingDialog(),
-        ).then((value) => refreshList()),
+        ).then((success) {
+          if (success) refreshList();
+        }),
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
