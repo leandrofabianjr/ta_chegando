@@ -31,7 +31,7 @@ class TaChegandoTrackings {
 
     for (final t in trackings) {
       try {
-        t.json = await api.fetchTrackingService(t.codigo!);
+        t.json = await api.fetchTrackingService(t.codigo);
         t.errorMessage = null;
       } catch (e) {
         t.errorMessage = e.toString();

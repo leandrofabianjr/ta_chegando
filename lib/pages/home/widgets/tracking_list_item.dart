@@ -40,14 +40,14 @@ class _TrackingsListItemWidgetState extends State<TrackingsListItem> {
                         children: [
                           Text(obj.descricao!),
                           Text(
-                            '(${obj.codigo!})',
+                            '(${obj.codigo})',
                             style: const TextStyle(fontSize: 12),
                           ),
                         ],
                       ),
                     ],
                   )
-                : Text(obj.codigo!),
+                : Text(obj.codigo),
           ],
         ),
         subtitle: obj.tracking!.eventos.isEmpty

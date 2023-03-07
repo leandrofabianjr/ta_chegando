@@ -93,6 +93,7 @@ class _AddTrackingDialogState extends State<AddTrackingDialog> {
                             ).hasMatch(value)) {
                           return 'Esse código é inválido';
                         }
+                        return null;
                       },
                     ),
                     TextFormField(
