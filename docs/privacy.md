@@ -1,2 +1,2 @@
-# Plítica de Privacidade
+# Política de Privacidade
 
