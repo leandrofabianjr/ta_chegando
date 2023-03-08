@@ -98,8 +98,8 @@ class CorreiosEndereco {
     required this.uf,
   });
 
-  static CorreiosEndereco? fromJson(json) {
-    if (json == null) return null;
+  static CorreiosEndereco? fromJson(Map? json) {
+    if (json == null || json.isEmpty) return null;
 
     return CorreiosEndereco(
       cidade: json['cidade'],
@@ -114,20 +114,26 @@ class CorreiosEndereco {
 }
 
 class CorreiosUnidade {
-  CorreiosEndereco? endereco;
   String tipo;
+  CorreiosEndereco? endereco;
+  String? codSro;
+  String? nome;
 
   CorreiosUnidade({
-    this.endereco,
     required this.tipo,
+    this.endereco,
+    this.codSro,
+    this.nome,
   });
 
   static CorreiosUnidade? fromJson(json) {
-    if (json == null) return null;
+    if (json == null || json.isEmpty) return null;
 
     return CorreiosUnidade(
-      endereco: CorreiosEndereco.fromJson(json['endereco']),
       tipo: json['tipo'],
+      endereco: CorreiosEndereco.fromJson(json['endereco']),
+      codSro: json['codSro'],
+      nome: json['nome'],
     );
   }
 
@@ -135,6 +141,8 @@ class CorreiosUnidade {
     return {
       'endereco': endereco,
       'tipo': tipo,
+      'codSro': codSro,
+      'nome': nome,
     };
   }
 }
@@ -151,7 +159,7 @@ class CorreiosTipoPostal {
   });
 
   static CorreiosTipoPostal? fromJson(json) {
-    if (json == null) return null;
+    if (json == null || json.isEmpty) return null;
 
     return CorreiosTipoPostal(
       categoria: json['categoria'],
@@ -197,7 +205,7 @@ class CorreiosObject {
   });
 
   static CorreiosObject? fromJson(json) {
-    if (json == null) return null;
+    if (json == null || json.isEmpty) return null;
 
     return CorreiosObject(
       codObjeto: json['codObjeto'],
@@ -251,7 +259,7 @@ class CorreiosObjectEvent {
   });
 
   static CorreiosObjectEvent? fromJson(json) {
-    if (json == null) return null;
+    if (json == null || json.isEmpty) return null;
 
     return CorreiosObjectEvent(
       codigo: json['codigo'],
@@ -265,7 +273,7 @@ class CorreiosObjectEvent {
   }
 
   static List<CorreiosObjectEvent?> fromJsonList(List? jsonList) {
-    if (jsonList == null) return [];
+    if (jsonList == null || jsonList.isEmpty) return [];
 
     return jsonList.map((json) => CorreiosObjectEvent.fromJson(json)).toList();
   }

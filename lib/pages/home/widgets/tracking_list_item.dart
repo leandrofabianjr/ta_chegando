@@ -95,8 +95,10 @@ class _TrackingsListItemWidgetState extends State<TrackingsListItem> {
                                       Column(
                                         children: [
                                           Text(e.unidade?.tipo ?? ''),
-                                          Text(e.unidade?.endereco.toString() ??
-                                              ''),
+                                          Text((e.unidade?.endereco ??
+                                                  e.unidade?.nome ??
+                                                  '')
+                                              .toString()),
                                         ],
                                       ),
                                     ],
@@ -118,9 +120,10 @@ class _TrackingsListItemWidgetState extends State<TrackingsListItem> {
                                         Column(
                                           children: [
                                             Text(e.unidadeDestino?.tipo ?? ''),
-                                            Text(e.unidadeDestino?.endereco
-                                                    .toString() ??
-                                                ''),
+                                            Text((e.unidadeDestino?.endereco ??
+                                                    e.unidadeDestino?.nome ??
+                                                    '')
+                                                .toString()),
                                           ],
                                         ),
                                       ],
