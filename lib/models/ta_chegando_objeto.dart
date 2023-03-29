@@ -37,7 +37,7 @@ class TaChegandoObjeto {
       descricao: json['descricao'],
       json: json['json'],
       errorMessage: json['errorMessage'],
-      createdAt: DateTime.tryParse(json['createdAt']),
+      createdAt: DateTime.tryParse(json['createdAt'] ?? ''),
       isDeleted: json['isDeleted'],
       deletedAt: DateTime.tryParse(json['deletedAt'] ?? ''),
     );
